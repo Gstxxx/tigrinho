@@ -270,13 +270,12 @@ export default function CrashGamePage() {
     setCashingOut(true);
 
     try {
-      const response = await fetch('/api/crash/cashout', {
-        method: 'POST',
+      const response = await fetch('/api/crash/bet', {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          gameId: game.id,
           betId: userBet.id,
           multiplier: currentMultiplier,
         }),
