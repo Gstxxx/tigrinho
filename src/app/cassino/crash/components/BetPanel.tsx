@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { FaWallet, FaInfoCircle, FaChartLine, FaHistory } from 'react-icons/fa';
-import { User, CrashGame, CrashBet } from './types';
+import { CrashGame, CrashBet } from './types';
 import { getCrashOdds } from '@/lib/crash';
 
 interface BetPanelProps {
-    user: User | null;
     game: CrashGame | null;
     userBet: CrashBet | null;
     currentMultiplier: number;
@@ -17,7 +16,6 @@ interface BetPanelProps {
 }
 
 export default function BetPanel({
-    user,
     game,
     userBet,
     currentMultiplier,

@@ -13,6 +13,10 @@ interface CrashGraphProps {
     onCrash: () => void;
 }
 
+interface GameHistoryItem {
+    crashPoint: number;
+}
+
 export default function CrashGraph({
     game,
     gameStartTime,
@@ -35,7 +39,7 @@ export default function CrashGraph({
                 }
 
                 const data = await response.json();
-                setGameHistory(data.history.map((h: any) => h.crashPoint));
+                setGameHistory(data.history.map((h: GameHistoryItem) => h.crashPoint));
             } catch (err) {
                 console.error('Erro ao buscar histórico:', err);
             }

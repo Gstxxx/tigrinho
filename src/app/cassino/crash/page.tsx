@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getCrashOdds, calculateMultiplier } from '@/lib/crash';
-import { FaWallet, FaUser, FaSignOutAlt, FaHistory, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
+import { calculateMultiplier } from '@/lib/crash';
 
 // Componentes
 import Header from './components/Header';
@@ -19,12 +18,6 @@ import ErrorMessage from './components/ErrorMessage';
 // Tipos
 import { User, CrashBet, CrashGame, UserBet } from './components/types';
 
-interface GameHistoryItem {
-  id: string;
-  crashPoint: number;
-  createdAt: string;
-}
-
 export default function CrashGamePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -32,12 +25,9 @@ export default function CrashGamePage() {
   const [bets, setBets] = useState<CrashBet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [betAmount, setBetAmount] = useState<number>(10);
-  const [autoWithdrawAt, setAutoWithdrawAt] = useState<number | null>(null);
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1.00);
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [userBet, setUserBet] = useState<CrashBet | null>(null);
-  const [gameHistory, setGameHistory] = useState<number[]>([]);
   const [placingBet, setPlacingBet] = useState(false);
   const [cashingOut, setCashingOut] = useState(false);
   const [countdown, setCountdown] = useState<number>(10); // Temporizador para início do jogo
@@ -46,9 +36,6 @@ export default function CrashGamePage() {
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [userBetHistory, setUserBetHistory] = useState<UserBet[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
-
-  // Obter as odds do jogo
-  const crashOdds = getCrashOdds();
 
   // Buscar dados do usuário
   useEffect(() => {
@@ -231,25 +218,6 @@ export default function CrashGamePage() {
 
     fetchUserBetHistory();
   }, [user, game]);
-
-  // Buscar histórico de jogos
-  useEffect(() => {
-    const fetchGameHistory = async () => {
-      try {
-        const response = await fetch('/api/crash/history');
-        if (!response.ok) {
-          throw new Error('Erro ao buscar histórico de jogos');
-        }
-
-        const data = await response.json();
-        setGameHistory(data.history.map((h: GameHistoryItem) => h.crashPoint));
-      } catch (err) {
-        console.error('Erro ao buscar histórico:', err);
-      }
-    };
-
-    fetchGameHistory();
-  }, []);
 
   // Função para fazer uma aposta
   const handlePlaceBet = async (amount: number, autoWithdrawAt: number | null) => {
@@ -553,13 +521,7 @@ export default function CrashGamePage() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [gameStartTime, game?.status, game?.id, game?.crashPoint, userBet, handleCashout, game]);
-
-  // Formatar data para exibição
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  };
+  }, [gameStartTime, game?.status, game?.id, game?.crashPoint, userBet, handleCashout]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -608,7 +570,6 @@ export default function CrashGamePage() {
           {/* Painel de apostas */}
           <div className="lg:col-span-1">
             <BetPanel
-              user={user}
               game={game}
               userBet={userBet}
               currentMultiplier={currentMultiplier}
