@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { TransactionType } from "@prisma/client";
 
 // POST: Criar uma nova aposta
 export async function POST(req: NextRequest) {
@@ -8,10 +9,7 @@ export async function POST(req: NextRequest) {
     // Verificar se o usuário está autenticado
     const user = await getAuthenticatedUser(req);
     if (!user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     // Obter os dados da requisição
@@ -19,20 +17,17 @@ export async function POST(req: NextRequest) {
 
     // Validar os dados
     if (!gameId || !amount || amount <= 0) {
-      return NextResponse.json(
-        { error: 'Dados inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
     }
 
     // Buscar o usuário e o jogo
     const userData = await prisma.user.findUnique({
-      where: { id: user.id }
+      where: { id: user.id },
     });
 
     if (!userData) {
       return NextResponse.json(
-        { error: 'Usuário não encontrado' },
+        { error: "Usuário não encontrado" },
         { status: 404 }
       );
     }
@@ -40,27 +35,27 @@ export async function POST(req: NextRequest) {
     // Verificar se o usuário tem saldo suficiente
     if (userData.balance < amount) {
       return NextResponse.json(
-        { error: 'Saldo insuficiente' },
+        { error: "Saldo insuficiente" },
         { status: 400 }
       );
     }
 
     // Buscar o jogo
     const game = await prisma.crashGame.findUnique({
-      where: { id: gameId }
+      where: { id: gameId },
     });
 
     if (!game) {
       return NextResponse.json(
-        { error: 'Jogo não encontrado' },
+        { error: "Jogo não encontrado" },
         { status: 404 }
       );
     }
 
     // Verificar se o jogo está aceitando apostas
-    if (game.status !== 'PENDING') {
+    if (game.status !== "PENDING") {
       return NextResponse.json(
-        { error: 'O jogo não está aceitando apostas' },
+        { error: "O jogo não está aceitando apostas" },
         { status: 400 }
       );
     }
@@ -69,13 +64,13 @@ export async function POST(req: NextRequest) {
     const existingBet = await prisma.crashBet.findFirst({
       where: {
         gameId,
-        userId: user.id
-      }
+        userId: user.id,
+      },
     });
 
     if (existingBet) {
       return NextResponse.json(
-        { error: 'Você já tem uma aposta neste jogo' },
+        { error: "Você já tem uma aposta neste jogo" },
         { status: 400 }
       );
     }
@@ -86,11 +81,11 @@ export async function POST(req: NextRequest) {
       const bet = await tx.crashBet.create({
         data: {
           amount,
-          status: 'ACTIVE',
+          status: "ACTIVE",
           autoWithdrawAt,
           userId: user.id,
-          gameId
-        }
+          gameId,
+        },
       });
 
       // Atualizar o saldo do usuário
@@ -98,9 +93,9 @@ export async function POST(req: NextRequest) {
         where: { id: user.id },
         data: {
           balance: {
-            decrement: amount
-          }
-        }
+            decrement: amount,
+          },
+        },
       });
 
       // Registrar a transação
@@ -108,22 +103,22 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           amount: -amount,
-          type: 'BET_PLACEMENT'
-        }
+          type: "BET_PLACEMENT" as TransactionType,
+        },
       });
 
       return { bet, user: updatedUser };
     });
 
     return NextResponse.json({
-      message: 'Aposta realizada com sucesso',
+      message: "Aposta realizada com sucesso",
       bet: result.bet,
-      balance: result.user.balance
+      balance: result.user.balance,
     });
   } catch (error) {
-    console.error('Erro ao criar aposta:', error);
+    console.error("Erro ao criar aposta:", error);
     return NextResponse.json(
-      { error: 'Erro ao criar aposta' },
+      { error: "Erro ao criar aposta" },
       { status: 500 }
     );
   }
@@ -135,10 +130,7 @@ export async function PATCH(req: NextRequest) {
     // Verificar se o usuário está autenticado
     const user = await getAuthenticatedUser(req);
     if (!user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     // Obter os dados da requisição
@@ -146,23 +138,20 @@ export async function PATCH(req: NextRequest) {
 
     // Validar os dados
     if (!betId || !multiplier || multiplier <= 1) {
-      return NextResponse.json(
-        { error: 'Dados inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
     }
 
     // Buscar a aposta
     const bet = await prisma.crashBet.findUnique({
       where: { id: betId },
       include: {
-        game: true
-      }
+        game: true,
+      },
     });
 
     if (!bet) {
       return NextResponse.json(
-        { error: 'Aposta não encontrada' },
+        { error: "Aposta não encontrada" },
         { status: 404 }
       );
     }
@@ -170,23 +159,23 @@ export async function PATCH(req: NextRequest) {
     // Verificar se a aposta pertence ao usuário
     if (bet.userId !== user.id) {
       return NextResponse.json(
-        { error: 'Esta aposta não pertence a você' },
+        { error: "Esta aposta não pertence a você" },
         { status: 403 }
       );
     }
 
     // Verificar se a aposta está ativa
-    if (bet.status !== 'ACTIVE') {
+    if (bet.status !== "ACTIVE") {
       return NextResponse.json(
-        { error: 'Esta aposta não está ativa' },
+        { error: "Esta aposta não está ativa" },
         { status: 400 }
       );
     }
 
     // Verificar se o jogo está em andamento
-    if (bet.game.status !== 'RUNNING') {
+    if (bet.game.status !== "RUNNING") {
       return NextResponse.json(
-        { error: 'O jogo não está em andamento' },
+        { error: "O jogo não está em andamento" },
         { status: 400 }
       );
     }
@@ -194,12 +183,12 @@ export async function PATCH(req: NextRequest) {
     // Verificar se o multiplicador é válido
     // Durante o jogo em andamento, não verificamos o crashPoint
     // pois ele só é definido quando o jogo termina
-    console.log('Validando multiplicador:', { 
-      multiplier, 
+    console.log("Validando multiplicador:", {
+      multiplier,
       crashPoint: bet.game.crashPoint,
-      gameStatus: bet.game.status
+      gameStatus: bet.game.status,
     });
-    
+
     // Calcular o lucro
     const profit = bet.amount * multiplier - bet.amount;
 
@@ -209,10 +198,10 @@ export async function PATCH(req: NextRequest) {
       const updatedBet = await tx.crashBet.update({
         where: { id: betId },
         data: {
-          status: 'CASHED_OUT',
+          status: "CASHED_OUT",
           cashoutMultiplier: multiplier,
-          profit
-        }
+          profit,
+        },
       });
 
       // Atualizar o saldo do usuário (devolver o valor apostado + lucro)
@@ -220,9 +209,9 @@ export async function PATCH(req: NextRequest) {
         where: { id: user.id },
         data: {
           balance: {
-            increment: bet.amount * multiplier
-          }
-        }
+            increment: bet.amount * multiplier,
+          },
+        },
       });
 
       // Registrar a transação
@@ -230,23 +219,23 @@ export async function PATCH(req: NextRequest) {
         data: {
           userId: user.id,
           amount: bet.amount * multiplier,
-          type: 'BET_SETTLEMENT'
-        }
+          type: "BET_SETTLEMENT" as TransactionType,
+        },
       });
 
       return { bet: updatedBet, user: updatedUser };
     });
 
     return NextResponse.json({
-      message: 'Cashout realizado com sucesso',
+      message: "Cashout realizado com sucesso",
       bet: result.bet,
-      balance: result.user.balance
+      balance: result.user.balance,
     });
   } catch (error) {
-    console.error('Erro ao realizar cashout:', error);
+    console.error("Erro ao realizar cashout:", error);
     return NextResponse.json(
-      { error: 'Erro ao realizar cashout' },
+      { error: "Erro ao realizar cashout" },
       { status: 500 }
     );
   }
-} 
+}

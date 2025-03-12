@@ -1,8 +1,5 @@
 import Link from 'next/link';
 import { FaLock, FaGift, FaGamepad, FaChartLine } from 'react-icons/fa';
-import { IoMdFootball } from 'react-icons/io';
-import { BiBasketball, BiTennisBall } from 'react-icons/bi';
-import { GiVolleyballBall } from 'react-icons/gi';
 
 export default function Home() {
   return (
@@ -14,7 +11,7 @@ export default function Home() {
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-600">Tigrinho</span>
             <span className="ml-2 bg-yellow-500 px-2 py-1 rounded text-black">BET</span>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <Link
               href="/login"
@@ -37,7 +34,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[url('/tiger-pattern.png')] opacity-5 z-0"></div>
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-yellow-500/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
-        
+
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="inline-block mb-3 bg-yellow-500/10 px-4 py-1 rounded-full">
             <span className="text-yellow-400 text-sm font-medium">Bônus de 100% até R$500</span>
@@ -63,7 +60,7 @@ export default function Home() {
               Já tenho conta
             </Link>
           </div>
-          
+
           <div className="mt-16 flex flex-wrap justify-center gap-6 text-gray-400 text-sm">
             <div className="flex items-center gap-2">
               <FaLock className="text-yellow-500" />
@@ -92,7 +89,7 @@ export default function Home() {
             <span className="inline-block text-yellow-500 font-medium mb-2">VANTAGENS EXCLUSIVAS</span>
             <h2 className="text-4xl font-bold">Por que escolher a Tigrinho BET?</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-8 rounded-2xl border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/5 group">
               <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-all">
@@ -103,7 +100,7 @@ export default function Home() {
                 Aposte em mais de 30 esportes diferentes com as melhores odds do mercado e acompanhe ao vivo.
               </p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-8 rounded-2xl border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/5 group">
               <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-all">
                 <span className="text-yellow-500 text-3xl">🎁</span>
@@ -113,7 +110,7 @@ export default function Home() {
                 Ganhe até R$ 500 em bônus no seu primeiro depósito e aproveite promoções semanais exclusivas.
               </p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-8 rounded-2xl border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/5 group">
               <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-all">
                 <span className="text-yellow-500 text-3xl">🎮</span>
@@ -133,7 +130,7 @@ export default function Home() {
             <span className="inline-block text-yellow-500 font-medium mb-2">CASSINO ONLINE</span>
             <h2 className="text-4xl font-bold">Jogos de Cassino</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl overflow-hidden border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/10 group">
               <div className="aspect-video bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 flex items-center justify-center relative overflow-hidden">
@@ -153,7 +150,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl overflow-hidden border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/10 group">
               <div className="aspect-video bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 flex items-center justify-center relative overflow-hidden">
                 <span className="text-5xl group-hover:scale-125 transition-transform duration-500">🎰</span>
@@ -172,7 +169,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl overflow-hidden border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/10 group">
               <div className="aspect-video bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 flex items-center justify-center relative overflow-hidden">
                 <span className="text-5xl group-hover:scale-125 transition-transform duration-500">🎯</span>
@@ -191,7 +188,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl overflow-hidden border border-gray-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/10 group">
               <div className="aspect-video bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 flex items-center justify-center relative overflow-hidden">
                 <span className="text-5xl group-hover:scale-125 transition-transform duration-500">🃏</span>
@@ -247,7 +244,7 @@ export default function Home() {
                 A melhor plataforma de apostas esportivas e jogos de cassino online do Brasil.
               </p>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-semibold mb-4">Links Rápidos</h3>
               <ul className="space-y-2 text-gray-400">
@@ -257,7 +254,7 @@ export default function Home() {
                 <li><a href="#" className="hover:text-yellow-500 transition-colors">Promoções</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-semibold mb-4">Suporte</h3>
               <ul className="space-y-2 text-gray-400">
@@ -267,7 +264,7 @@ export default function Home() {
                 <li><a href="#" className="hover:text-yellow-500 transition-colors">Contato</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-gray-400">
@@ -278,7 +275,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800/50 pt-8 text-center">
             <p className="text-gray-400">
               © 2023 Tigrinho BET. Todos os direitos reservados.

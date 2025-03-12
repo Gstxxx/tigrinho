@@ -2,12 +2,14 @@
   "name": "tigrinho",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "buildbackup": "npx prisma generate && npx prisma migrate dev && npm run seed && next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "NODE_OPTIONS=\"--loader ts-node/esm\" node src/lib/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
