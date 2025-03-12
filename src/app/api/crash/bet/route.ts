@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           amount: -amount,
-          type: "BET_PLACEMENT" as TransactionType,
+          type: "CRASH_BET_PLACEMENT",
         },
       });
 
@@ -219,7 +219,7 @@ export async function PATCH(req: NextRequest) {
         data: {
           userId: user.id,
           amount: bet.amount * multiplier,
-          type: "BET_SETTLEMENT" as TransactionType,
+          type: "CRASH_BET_SETTLEMENT",
         },
       });
 
