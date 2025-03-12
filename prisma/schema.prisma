@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  balance       Float     @default(100.0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bets          Bet[]
+  transactions  Transaction[]
+}
+
+model Sport {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  events        Event[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Event {
+  id            String    @id @default(uuid())
+  name          String
+  startTime     DateTime
+  status        EventStatus @default(UPCOMING)
+  sportId       String
+  sport         Sport     @relation(fields: [sportId], references: [id])
+  markets       Market[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Market {
+  id            String    @id @default(uuid())
+  name          String
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id])
+  selections    Selection[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Selection {
+  id            String    @id @default(uuid())
+  name          String
+  odds          Float
+  status        SelectionStatus @default(OPEN)
+  marketId      String
+  market        Market    @relation(fields: [marketId], references: [id])
+  bets          Bet[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Bet {
+  id            String    @id @default(uuid())
+  amount        Float
+  potentialWin  Float
+  status        BetStatus @default(PENDING)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  selectionId   String
+  selection     Selection @relation(fields: [selectionId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Transaction {
+  id            String    @id @default(uuid())
+  amount        Float
+  type          TransactionType
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum EventStatus {
+  UPCOMING
+  LIVE
+  FINISHED
+  CANCELLED
+}
+
+enum SelectionStatus {
+  OPEN
+  SETTLED_WIN
+  SETTLED_LOSS
+  VOID
+  CANCELLED
+}
+
+enum BetStatus {
+  PENDING
+  WON
+  LOST
+  VOID
+  CANCELLED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  BET_PLACEMENT
+  BET_SETTLEMENT
+}
