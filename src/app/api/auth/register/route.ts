@@ -4,10 +4,9 @@ import { hashPassword } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password } = await request.json();
 
-    // Validação básica
+    // Validar os dados
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: 'Nome, email e senha são obrigatórios' },
@@ -27,7 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Hash da senha
+    // Criptografar a senha
     const hashedPassword = await hashPassword(password);
 
     // Criar o usuário
@@ -36,18 +35,19 @@ export async function POST(request: Request) {
         name,
         email,
         password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        balance: true,
-        createdAt: true,
+        balance: 100, // Saldo inicial
       },
     });
 
     return NextResponse.json(
-      { message: 'Usuário registrado com sucesso', user },
+      {
+        message: 'Usuário criado com sucesso',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      },
       { status: 201 }
     );
   } catch (error) {

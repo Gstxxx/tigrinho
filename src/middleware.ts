@@ -8,6 +8,7 @@ export async function middleware(request: NextRequest) {
     '/api/bets',
     '/api/users/me',
     '/api/transactions',
+    '/api/crash',
   ];
 
   // Rotas de páginas que requerem autenticação
@@ -15,6 +16,7 @@ export async function middleware(request: NextRequest) {
     '/dashboard',
     '/bets',
     '/events',
+    '/cassino',
   ];
 
   // Verificar se a rota atual é uma API protegida
@@ -33,7 +35,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Verificar o token de autenticação
-  const token = request.cookies.get('auth-token')?.value;
+  const token = request.cookies.get('token')?.value;
   
   console.log('Middleware - Rota:', request.nextUrl.pathname);
   console.log('Middleware - Token:', token ? 'Presente' : 'Ausente');
@@ -54,7 +56,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Verificar o token (agora é uma função assíncrona)
+    // Verificar o token
     const payload = await verifyToken(token);
     console.log('Middleware - Payload:', payload ? `Válido (userId: ${payload.userId})` : 'Inválido');
 
@@ -84,7 +86,7 @@ export async function middleware(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Middleware - Erro ao verificar token:', error);
+    console.error('Erro ao verificar token:', error);
     
     // Para rotas de API, retornar erro 401
     if (isProtectedApiPath) {
@@ -104,11 +106,13 @@ export const config = {
     '/api/bets/:path*',
     '/api/users/me',
     '/api/transactions/:path*',
+    '/api/crash/:path*',
     '/dashboard/:path*',
     '/dashboard',
     '/bets/:path*',
     '/bets',
     '/events/:path*',
     '/events',
+    '/cassino/:path*',
   ],
 }; 

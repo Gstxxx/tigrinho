@@ -1,42 +1,22 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthenticatedUser } from '@/lib/auth';
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   try {
-    // Obter o userId do header definido pelo middleware
-    const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
+    const user = await getAuthenticatedUser(req);
+    
+    if (!user) {
       return NextResponse.json(
         { error: 'Não autorizado' },
         { status: 401 }
       );
     }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        balance: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
-    }
-
+    
     return NextResponse.json({ user });
   } catch (error) {
     console.error('Erro ao buscar usuário:', error);
     return NextResponse.json(
-      { error: 'Erro ao buscar informações do usuário' },
+      { error: 'Erro ao buscar dados do usuário' },
       { status: 500 }
     );
   }

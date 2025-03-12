@@ -4,14 +4,10 @@ import { comparePasswords, generateToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    const { email, password } = await request.json();
 
-    console.log('Login - Tentativa de login:', email);
-
-    // Validação básica
+    // Validar os dados
     if (!email || !password) {
-      console.log('Login - Erro: Email ou senha ausentes');
       return NextResponse.json(
         { error: 'Email e senha são obrigatórios' },
         { status: 400 }
@@ -23,55 +19,48 @@ export async function POST(request: Request) {
       where: { email },
     });
 
+    // Verificar se o usuário existe
     if (!user) {
-      console.log('Login - Erro: Usuário não encontrado');
       return NextResponse.json(
-        { error: 'Credenciais inválidas' },
+        { error: 'Email ou senha incorretos' },
         { status: 401 }
       );
     }
 
     // Verificar a senha
     const isPasswordValid = await comparePasswords(password, user.password);
-
     if (!isPasswordValid) {
-      console.log('Login - Erro: Senha inválida');
       return NextResponse.json(
-        { error: 'Credenciais inválidas' },
+        { error: 'Email ou senha incorretos' },
         { status: 401 }
       );
     }
 
-    // Gerar token JWT (agora é uma função assíncrona)
+    // Gerar o token JWT
     const token = await generateToken(user.id);
-    console.log('Login - Token gerado para usuário:', user.id);
 
-    // Criar resposta com cookie
-    const response = NextResponse.json({
-      message: 'Login realizado com sucesso',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        balance: user.balance,
+    // Criar a resposta com o cookie
+    const response = NextResponse.json(
+      { 
+        message: 'Login realizado com sucesso',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          balance: user.balance,
+        }
       },
-    });
+      { status: 200 }
+    );
 
     // Definir o cookie com o token
     response.cookies.set({
-      name: 'auth-token',
+      name: 'token',
       value: token,
       httpOnly: true,
       path: '/',
-      secure: false, // Alterado para false em ambiente de desenvolvimento
-      sameSite: 'lax', // Adicionado para garantir que o cookie seja enviado em navegações
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 7, // 7 dias
-    });
-
-    console.log('Login - Cookie definido:', {
-      name: 'auth-token',
-      value: token ? 'Token presente' : 'Token ausente',
-      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;

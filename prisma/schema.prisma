@@ -23,6 +23,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   bets          Bet[]
   transactions  Transaction[]
+  crashBets     CrashBet[]
 }
 
 model Sport {
@@ -90,6 +91,33 @@ model Transaction {
   updatedAt     DateTime  @updatedAt
 }
 
+// Modelos para o jogo Crash
+model CrashGame {
+  id            String    @id @default(uuid())
+  crashPoint    Float     // O ponto onde o jogo "crashou"
+  seed          String    // Semente usada para gerar o crashPoint
+  hash          String    // Hash da semente para verificação
+  status        CrashGameStatus @default(PENDING)
+  bets          CrashBet[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model CrashBet {
+  id            String    @id @default(uuid())
+  amount        Float     // Valor apostado
+  cashoutMultiplier Float?  // Multiplicador no momento do cashout (null se não fez cashout)
+  autoWithdrawAt Float?   // Multiplicador para saque automático (opcional)
+  status        CrashBetStatus @default(ACTIVE)
+  profit        Float?    // Lucro obtido (null se perdeu)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  gameId        String
+  game          CrashGame @relation(fields: [gameId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 enum EventStatus {
   UPCOMING
   LIVE
@@ -118,4 +146,20 @@ enum TransactionType {
   WITHDRAWAL
   BET_PLACEMENT
   BET_SETTLEMENT
+  CRASH_BET_PLACEMENT
+  CRASH_BET_SETTLEMENT
+}
+
+enum CrashGameStatus {
+  PENDING    // Aguardando início
+  RUNNING    // Em andamento
+  CRASHED    // Finalizado (crashou)
+  COMPLETED  // Todas as apostas foram processadas
+}
+
+enum CrashBetStatus {
+  ACTIVE     // Aposta ativa
+  CASHED_OUT // Usuário sacou antes do crash
+  LOST       // Usuário não sacou a tempo
+  CANCELLED  // Aposta cancelada (raro)
 }
