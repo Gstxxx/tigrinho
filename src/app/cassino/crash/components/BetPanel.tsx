@@ -149,7 +149,7 @@ export default function BetPanel({
                     <div className="text-xs text-gray-400 bg-gray-800/30 p-3 rounded-xl">
                         <p className="mb-1 flex justify-between">
                             <span>Hash:</span>
-                            <span className="font-mono">{game?.hash.substring(0, 16)}...</span>
+                            <span className="font-mono">{game?.hash ? game.hash.substring(0, 16) + '...' : 'Carregando...'}</span>
                         </p>
                         {game?.status === 'CRASHED' && game?.seed && (
                             <p className="mb-1 flex justify-between">
