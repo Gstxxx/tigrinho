@@ -221,12 +221,17 @@ export async function PATCH(req: NextRequest) {
     if (
       (game.status === "PENDING" && status !== "RUNNING") ||
       (game.status === "RUNNING" && status !== "CRASHED") ||
-      game.status === "CRASHED"
+      (game.status === "CRASHED" && status !== "PENDING")
     ) {
       return NextResponse.json(
         { error: "Transição de estado inválida" },
         { status: 400 }
       );
+    }
+
+    // Se o jogo já estiver no estado desejado, apenas retornar o jogo atual
+    if (game.status === status) {
+      return NextResponse.json({ game });
     }
 
     // Atualizar o jogo

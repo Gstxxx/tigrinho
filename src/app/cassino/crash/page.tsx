@@ -145,7 +145,16 @@ export default function CrashGamePage() {
                 status: 'RUNNING',
               }),
             })
-              .then(response => response.json())
+              .then(response => {
+                if (!response.ok) {
+                  return response.json().then(data => {
+                    console.error('Erro ao iniciar jogo:', data.error);
+                    setError(data.error || 'Erro ao iniciar jogo');
+                    throw new Error(data.error || 'Erro ao iniciar jogo');
+                  });
+                }
+                return response.json();
+              })
               .then(data => {
                 console.log('Jogo iniciado:', data);
                 // Definir o tempo de início do jogo
@@ -153,7 +162,8 @@ export default function CrashGamePage() {
               })
               .catch(err => {
                 console.error('Erro ao iniciar jogo:', err);
-                setError('Erro ao iniciar jogo');
+                // Não definir erro aqui para evitar recarregar a página
+                // Apenas registrar no console
               });
 
             return 0;
@@ -241,7 +251,10 @@ export default function CrashGamePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao fazer aposta');
+        console.error('Erro ao fazer aposta:', data.error);
+        setError(data.error || 'Erro ao fazer aposta');
+        setPlacingBet(false);
+        return;
       }
 
       // Atualizar o saldo do usuário
@@ -257,7 +270,8 @@ export default function CrashGamePage() {
       setBets([...bets, data.bet]);
     } catch (err) {
       console.error('Erro ao fazer aposta:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao fazer aposta');
+      // Não definir erro aqui para evitar recarregar a página
+      // Apenas registrar no console
     } finally {
       setPlacingBet(false);
     }
@@ -284,7 +298,10 @@ export default function CrashGamePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao fazer cashout');
+        console.error('Erro ao fazer cashout:', data.error);
+        setError(data.error || 'Erro ao fazer cashout');
+        setCashingOut(false);
+        return;
       }
 
       // Atualizar o saldo do usuário
@@ -314,7 +331,8 @@ export default function CrashGamePage() {
       ));
     } catch (err) {
       console.error('Erro ao fazer cashout:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao fazer cashout');
+      // Não definir erro aqui para evitar recarregar a página
+      // Apenas registrar no console
     } finally {
       setCashingOut(false);
     }
@@ -481,8 +499,22 @@ export default function CrashGamePage() {
             status: 'CRASHED',
           }),
         })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(data => {
+                console.error('Erro ao atualizar status do jogo:', data.error);
+                // Não definir erro aqui para evitar recarregar a página
+                throw new Error(data.error || 'Erro ao atualizar status do jogo');
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Jogo finalizado:', data);
+          })
           .catch(err => {
             console.error('Erro ao atualizar status do jogo:', err);
+            // Não definir erro aqui para evitar recarregar a página
           });
 
         // Parar a animação
