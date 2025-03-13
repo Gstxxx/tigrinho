@@ -154,7 +154,7 @@ export default function BetPanel({
                         {game?.status === 'CRASHED' && game?.seed && (
                             <p className="mb-1 flex justify-between">
                                 <span>Seed:</span>
-                                <span className="font-mono">{game.seed.substring(0, 16)}...</span>
+                                <span className="font-mono">{game.seed ? game.seed.substring(0, 16) + '...' : 'Carregando...'}</span>
                             </p>
                         )}
                         <p className="flex justify-between">
