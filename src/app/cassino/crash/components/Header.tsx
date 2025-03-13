@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { FaWallet, FaUser, FaSignOutAlt, FaChartLine } from 'react-icons/fa';
 import { User } from './types';
@@ -7,9 +8,26 @@ import { User } from './types';
 interface HeaderProps {
     user: User | null;
     onLogout: () => Promise<void>;
+    onAddBalance: () => Promise<void>;
 }
 
-export default function Header({ user, onLogout }: HeaderProps) {
+export default function Header({ user, onLogout, onAddBalance }: HeaderProps) {
+    const [isAddingBalance, setIsAddingBalance] = useState(false);
+
+    const handleAddBalance = async () => {
+        if (!user) return;
+
+        setIsAddingBalance(true);
+
+        try {
+            await onAddBalance();
+        } catch (err) {
+            console.error('Erro ao adicionar saldo:', err);
+        } finally {
+            setIsAddingBalance(false);
+        }
+    };
+
     return (
         <header className="bg-black/60 backdrop-blur-md shadow-lg shadow-yellow-500/10 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -25,8 +43,12 @@ export default function Header({ user, onLogout }: HeaderProps) {
                             <span className="text-sm font-medium">
                                 R$ {user.balance.toFixed(2)}
                             </span>
-                            <button className="ml-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500 text-xs rounded-md px-2 py-0.5 transition-colors">
-                                +
+                            <button
+                                className="ml-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500 text-xs rounded-md px-2 py-0.5 transition-colors"
+                                onClick={handleAddBalance}
+                                disabled={isAddingBalance}
+                            >
+                                {isAddingBalance ? '...' : '+'}
                             </button>
                         </div>
 

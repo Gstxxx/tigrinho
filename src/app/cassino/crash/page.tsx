@@ -359,6 +359,40 @@ export default function CrashGamePage() {
     setGameStartTime(null);
   };
 
+  // Função para adicionar saldo
+  const handleAddBalance = async (amount: number) => {
+    if (!user) return;
+
+    try {
+      const response = await fetch('/api/users/add-balance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Erro ao adicionar saldo:', data.error);
+        setError(data.error || 'Erro ao adicionar saldo');
+        return;
+      }
+
+      // Atualizar o saldo do usuário
+      setUser({
+        ...user,
+        balance: data.user.balance,
+      });
+    } catch (err) {
+      console.error('Erro ao adicionar saldo:', err);
+      // Não definir erro aqui para evitar recarregar a página
+    }
+  };
+
   // Renderizar o gráfico do jogo
   useEffect(() => {
     if (!game || !canvasRef.current) return;
@@ -573,7 +607,7 @@ export default function CrashGamePage() {
       <div className="absolute inset-0 bg-[url('/tiger-pattern.png')] opacity-5 z-0 pointer-events-none"></div>
 
       {/* Header */}
-      <Header user={user} onLogout={handleLogout} />
+      <Header user={user} onLogout={handleLogout} onAddBalance={() => handleAddBalance(100)} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <div className="flex items-center justify-between mb-8">
