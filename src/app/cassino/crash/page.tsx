@@ -252,8 +252,12 @@ export default function CrashGamePage() {
       // Atualizar a aposta do usuário
       setUserBet(data.bet);
 
-      // Atualizar a lista de apostas
-      setBets([...bets, data.bet]);
+      // Atualizar a lista de apostas com o nome do usuário
+      const betWithUserName = {
+        ...data.bet,
+        userName: user.name // Adicionar o nome do usuário à aposta
+      };
+      setBets([...bets, betWithUserName]);
     } catch (err) {
       console.error('Erro ao fazer aposta:', err);
       // Não definir erro aqui para evitar recarregar a página
@@ -312,6 +316,8 @@ export default function CrashGamePage() {
             status: 'CASHED_OUT',
             cashoutMultiplier: currentMultiplier,
             profit: bet.amount * currentMultiplier - bet.amount,
+            // Garantir que o userName seja mantido
+            userName: bet.userName || user.name
           }
           : bet
       ));

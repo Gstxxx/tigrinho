@@ -44,10 +44,10 @@ export default function BetList({ bets, user }: BetListProps) {
                                         <td className="py-3 pl-2">
                                             <div className="flex items-center">
                                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center mr-2 text-sm">
-                                                    {bet.userName.charAt(0).toUpperCase()}
+                                                    {bet.userName?.charAt(0)?.toUpperCase() || '?'}
                                                 </div>
                                                 <span className={`${bet.userId === user?.id ? 'font-medium text-yellow-500' : ''}`}>
-                                                    {bet.userName}
+                                                    {bet.userName || 'Jogador'}
                                                 </span>
                                             </div>
                                         </td>
