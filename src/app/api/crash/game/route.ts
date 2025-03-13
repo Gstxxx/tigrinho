@@ -231,6 +231,9 @@ export async function PATCH(req: NextRequest) {
     };
 
     if (!validTransitions[game.status]?.includes(status)) {
+      console.error(
+        `Transição de estado inválida: ${game.status} -> ${status}`
+      );
       return NextResponse.json(
         { error: "Transição de estado inválida" },
         { status: 400 }
@@ -244,6 +247,8 @@ export async function PATCH(req: NextRequest) {
       // Quando o jogo crashar, gerar o ponto de crash e a seed
       const crashPoint = generateCrashPoint(game.hash);
       const seed = generateSeedFromHash(game.hash);
+
+      console.log(`Jogo ${game.id} crashou em ${crashPoint}x`);
 
       updatedGame = await prisma.$transaction(async (tx) => {
         // Atualizar o jogo com o ponto de crash e a seed
@@ -270,6 +275,14 @@ export async function PATCH(req: NextRequest) {
 
         return updated;
       });
+    } else if (status === "RUNNING") {
+      console.log(`Iniciando jogo ${game.id}`);
+
+      // Apenas atualizar o status
+      updatedGame = await prisma.crashGame.update({
+        where: { id: gameId },
+        data: { status },
+      });
     } else {
       // Apenas atualizar o status
       updatedGame = await prisma.crashGame.update({
@@ -278,6 +291,7 @@ export async function PATCH(req: NextRequest) {
       });
     }
 
+    console.log(`Jogo ${gameId} atualizado para ${status}`);
     return NextResponse.json({ game: updatedGame });
   } catch (error) {
     console.error("Erro ao atualizar jogo:", error);

@@ -7,7 +7,7 @@ import { calculateMultiplier } from '@/lib/crash';
 interface CrashGraphProps {
     game: CrashGame | null;
     gameStartTime: number | null;
-    countdown: number;
+    countdown: number | null;
     currentMultiplier: number;
     setCurrentMultiplier: (multiplier: number) => void;
     onCrash: () => void;
@@ -246,8 +246,13 @@ export default function CrashGraph({
 
                 <div className="flex items-center">
                     {game?.status === 'PENDING' && (
-                        <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm flex items-center">
-                            <span>Próximo jogo em {countdown}s</span>
+                        <div className="bg-yellow-500/10 text-yellow-400 px-3 py-1 rounded-full text-sm flex items-center">
+                            <span className="animate-pulse mr-1">●</span>
+                            <span>
+                                {countdown !== null
+                                    ? `Próximo jogo em ${countdown}s`
+                                    : 'Iniciando...'}
+                            </span>
                         </div>
                     )}
 
@@ -285,7 +290,11 @@ export default function CrashGraph({
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                         <div className="text-center">
                             <div className="text-4xl font-bold text-yellow-500 mb-2">PREPARANDO</div>
-                            <div className="text-2xl font-bold text-white">Próximo jogo em {countdown}s</div>
+                            <div className="text-2xl font-bold text-white">
+                                {countdown !== null
+                                    ? `Próximo jogo em ${countdown}s`
+                                    : 'Iniciando...'}
+                            </div>
                         </div>
                     </div>
                 )}
