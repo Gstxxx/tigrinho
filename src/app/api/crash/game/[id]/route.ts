@@ -1,22 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { generateCrashPoint, generateSeedFromHash } from "@/lib/crash";
 
 // PUT: Atualizar o status do jogo por ID
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<Record<string, string>> }
 ) {
   try {
-    // Verificar se o usuário está autenticado
-    const user = await getAuthenticatedUser(req);
+    // Extrair o ID do jogo dos parâmetros
+    const paramsData = await params;
+    const id = paramsData.id;
+
+    const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    const gameId = params.id;
-    if (!gameId) {
+    if (!id) {
       return NextResponse.json(
         { error: "ID do jogo é obrigatório" },
         { status: 400 }
@@ -24,7 +26,7 @@ export async function PUT(
     }
 
     // Obter os dados da requisição
-    const { status } = await req.json();
+    const { status } = await request.json();
 
     if (!status) {
       return NextResponse.json(
@@ -40,7 +42,7 @@ export async function PUT(
 
     // Buscar o jogo
     const game = await prisma.crashGame.findUnique({
-      where: { id: gameId },
+      where: { id },
     });
 
     if (!game) {
@@ -60,7 +62,7 @@ export async function PUT(
       PENDING: ["RUNNING"],
       RUNNING: ["CRASHED"],
       CRASHED: ["PENDING"],
-      COMPLETED: [], // Adicionado para cobrir todos os possíveis estados
+      COMPLETED: [],
     };
 
     if (!validTransitions[game.status]?.includes(status)) {
@@ -77,16 +79,14 @@ export async function PUT(
     let updatedGame;
 
     if (status === "CRASHED") {
-      // Quando o jogo crashar, gerar o ponto de crash e a seed
       const crashPoint = generateCrashPoint(game.hash);
       const seed = generateSeedFromHash(game.hash);
 
       console.log(`Jogo ${game.id} crashou em ${crashPoint}x`);
 
       updatedGame = await prisma.$transaction(async (tx) => {
-        // Atualizar o jogo com o ponto de crash e a seed
         const updated = await tx.crashGame.update({
-          where: { id: gameId },
+          where: { id },
           data: {
             status,
             crashPoint,
@@ -94,10 +94,9 @@ export async function PUT(
           },
         });
 
-        // Processar as apostas perdidas
         await tx.crashBet.updateMany({
           where: {
-            gameId,
+            gameId: id,
             status: "ACTIVE",
           },
           data: {
@@ -108,23 +107,15 @@ export async function PUT(
 
         return updated;
       });
-    } else if (status === "RUNNING") {
-      console.log(`Iniciando jogo ${game.id}`);
-
-      // Apenas atualizar o status
-      updatedGame = await prisma.crashGame.update({
-        where: { id: gameId },
-        data: { status },
-      });
     } else {
-      // Apenas atualizar o status
+      console.log(`Atualizando jogo ${game.id} para o status ${status}`);
       updatedGame = await prisma.crashGame.update({
-        where: { id: gameId },
+        where: { id },
         data: { status },
       });
     }
 
-    console.log(`Jogo ${gameId} atualizado para ${status}`);
+    console.log(`Jogo ${id} atualizado para ${status}`);
     return NextResponse.json({ game: updatedGame });
   } catch (error) {
     console.error("Erro ao atualizar jogo:", error);
