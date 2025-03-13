@@ -1,19 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth";
-import { TransactionType } from "@prisma/client";
 
 // POST: Criar uma nova aposta
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
     // Verificar se o usuário está autenticado
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     // Obter os dados da requisição
-    const { gameId, amount, autoWithdrawAt } = await req.json();
+    const { gameId, amount, autoWithdrawAt } = await request.json();
 
     // Validar os dados
     if (!gameId || !amount || amount <= 0) {
@@ -125,16 +124,16 @@ export async function POST(req: NextRequest) {
 }
 
 // PATCH: Realizar cashout de uma aposta
-export async function PATCH(req: NextRequest) {
+export async function PATCH(request: Request) {
   try {
     // Verificar se o usuário está autenticado
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     // Obter os dados da requisição
-    const { betId, multiplier } = await req.json();
+    const { betId, multiplier } = await request.json();
 
     // Validar os dados
     if (!betId || !multiplier || multiplier <= 1) {

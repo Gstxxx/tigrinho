@@ -182,16 +182,16 @@ export async function POST(req: NextRequest) {
 }
 
 // PATCH: Atualizar o status do jogo (iniciar ou finalizar)
-export async function PATCH(req: NextRequest) {
+export async function PATCH(request: Request) {
   try {
     // Verificar se o usuário está autenticado
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     // Obter os dados da requisição
-    const { gameId, status } = await req.json();
+    const { gameId, status } = await request.json();
 
     if (!gameId || !status) {
       return NextResponse.json(

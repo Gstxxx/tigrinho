@@ -3,7 +3,6 @@
 
 import bcrypt from "bcryptjs";
 import * as jose from "jose";
-import { NextRequest } from "next/server";
 import { prisma } from "./prisma";
 
 // Função para criar uma chave secreta a partir da string do .env
@@ -87,12 +86,16 @@ export async function getUserById(userId: string) {
 /**
  * Obtém o usuário autenticado a partir do token JWT nos cookies
  */
-export async function getAuthenticatedUser(req?: NextRequest) {
+export async function getAuthenticatedUser(req?: Request) {
   let token: string | undefined;
 
   if (req) {
     // Se for uma API route, obter o token do cookie na requisição
-    token = req.cookies.get("token")?.value;
+    const cookieHeader = req.headers.get("cookie");
+    const cookies = cookieHeader
+      ? Object.fromEntries(cookieHeader.split("; ").map((c) => c.split("=")))
+      : {};
+    token = cookies["token"];
   } else {
     // Se for uma Server Component, não podemos usar cookies() diretamente
     // Esta função só deve ser chamada a partir de API routes
