@@ -172,6 +172,7 @@ export default function CrashGamePage() {
 
       // Definir o tempo de início do jogo se ainda não estiver definido
       if (!gameStartTime) {
+        console.log('Definindo tempo de início do jogo');
         setGameStartTime(Date.now());
       }
     }
@@ -189,7 +190,7 @@ export default function CrashGamePage() {
       // Resetar o tempo de início do jogo
       setGameStartTime(null);
     }
-  }, [game?.status, game?.id]);
+  }, [game?.status, game?.id, gameStartTime]);
 
   // Buscar histórico de apostas do usuário
   useEffect(() => {
@@ -406,6 +407,12 @@ export default function CrashGamePage() {
 
       console.log("Jogo iniciado com sucesso:", data.game);
       setGame(data.game);
+
+      // Definir o tempo de início do jogo quando o status mudar para RUNNING
+      if (data.game.status === "RUNNING") {
+        setGameStartTime(Date.now());
+      }
+
       setIsLoading(false);
     } catch (error) {
       console.error("Erro ao iniciar o jogo:", error);
