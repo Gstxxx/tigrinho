@@ -110,7 +110,61 @@ export default function CrashGamePage() {
       const interval = setInterval(fetchGameData, 5000);
       return () => clearInterval(interval);
     }
-  }, [user, game?.id]);
+  }, [user, game?.id, countdownInterval]);
+
+  // Função para iniciar o jogo
+  const startGame = useCallback(async () => {
+    try {
+      console.log("Tentando iniciar o jogo...");
+      if (!game || game.status !== "PENDING") {
+        console.error(`Não é possível iniciar o jogo no estado: ${game?.status}`);
+        toast.error("O jogo não está pronto para iniciar");
+        return;
+      }
+      const response = await fetch(`/api/crash/game/${game.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "RUNNING" }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("Erro ao iniciar o jogo:", data.error);
+        toast.error(data.error || "Erro ao iniciar o jogo");
+        return;
+      }
+      console.log("Jogo iniciado com sucesso:", data.game);
+      setGame(data.game);
+      if (data.game.status === "RUNNING") {
+        setGameStartTime(Date.now());
+      }
+    } catch (error) {
+      console.error("Erro ao iniciar o jogo:", error);
+      toast.error("Erro ao iniciar o jogo");
+    }
+  }, [game]);
+
+  // Função para gerenciar a contagem regressiva
+  const handleCountdown = useCallback(() => {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      setCountdownInterval(null);
+    }
+    let count = 5;
+    setCountdown(count);
+    const interval = setInterval(() => {
+      count--;
+      console.log("Contagem regressiva:", count);
+      setCountdown(count);
+      if (count <= 0) {
+        clearInterval(interval);
+        setCountdownInterval(null);
+        startGame();
+      }
+    }, 1000);
+    setCountdownInterval(interval);
+  }, [countdownInterval, startGame]);
 
   // Iniciar o jogo quando o status mudar para RUNNING
   useEffect(() => {
@@ -189,7 +243,24 @@ export default function CrashGamePage() {
       // Resetar o tempo de início do jogo
       setGameStartTime(null);
     }
-  }, [game?.status, game?.id, gameStartTime]);
+  }, [game?.status, game?.id, gameStartTime, countdownInterval, startGame]);
+
+  // Efeito para iniciar a contagem regressiva quando o jogo estiver no estado PENDING
+  useEffect(() => {
+    if (game?.status === "PENDING" && !countdownInterval && countdown === null) {
+      console.log("Iniciando contagem regressiva para o jogo PENDING");
+      handleCountdown();
+    }
+  }, [game, countdownInterval, countdown, handleCountdown]);
+
+  // Limpar o intervalo quando o componente for desmontado
+  useEffect(() => {
+    return () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+    };
+  }, [countdownInterval]);
 
   // Buscar histórico de apostas do usuário
   useEffect(() => {
@@ -379,75 +450,6 @@ export default function CrashGamePage() {
       // Não definir erro aqui para evitar recarregar a página
     }
   };
-
-  const startGame = useCallback(async () => {
-    try {
-      console.log("Tentando iniciar o jogo...");
-      if (game?.status !== "PENDING") {
-        console.error(`Não é possível iniciar o jogo no estado: ${game?.status}`);
-        toast.error("O jogo não está pronto para iniciar");
-        return;
-      }
-      const response = await fetch(`/api/crash/game/${game?.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: "RUNNING" }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        console.error("Erro ao iniciar o jogo:", data.error);
-        toast.error(data.error || "Erro ao iniciar o jogo");
-        return;
-      }
-      console.log("Jogo iniciado com sucesso:", data.game);
-      setGame(data.game);
-      if (data.game.status === "RUNNING") {
-        setGameStartTime(Date.now());
-      }
-    } catch (error) {
-      console.error("Erro ao iniciar o jogo:", error);
-      toast.error("Erro ao iniciar o jogo");
-    }
-  }, [game]);
-
-  const handleCountdown = useCallback(() => {
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      setCountdownInterval(null);
-    }
-    let count = 5;
-    setCountdown(count);
-    const interval = setInterval(() => {
-      count--;
-      console.log("Contagem regressiva:", count);
-      setCountdown(count);
-      if (count <= 0) {
-        clearInterval(interval);
-        setCountdownInterval(null);
-        startGame();
-      }
-    }, 1000);
-    setCountdownInterval(interval);
-  }, [countdownInterval, startGame]);
-
-  // Efeito para iniciar a contagem regressiva quando o jogo estiver no estado PENDING
-  useEffect(() => {
-    if (game?.status === "PENDING" && !countdownInterval && countdown === null) {
-      console.log("Iniciando contagem regressiva para o jogo PENDING");
-      handleCountdown();
-    }
-  }, [game?.status, countdownInterval, countdown, handleCountdown]);
-
-  // Limpar o intervalo quando o componente for desmontado
-  useEffect(() => {
-    return () => {
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-      }
-    };
-  }, [countdownInterval]);
 
   // Renderizar o gráfico do jogo
   useEffect(() => {
@@ -652,7 +654,7 @@ export default function CrashGamePage() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [gameStartTime, game?.status, game?.id, game?.crashPoint, userBet, handleCashout]);
+  }, [gameStartTime, game, userBet, handleCashout]);
 
   if (loading) {
     return <LoadingScreen />;
