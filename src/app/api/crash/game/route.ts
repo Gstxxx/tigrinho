@@ -217,21 +217,24 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    // Se o jogo já estiver no estado desejado, apenas retornar o jogo atual
+    if (game.status === status) {
+      return NextResponse.json({ game });
+    }
+
     // Verificar transições de estado válidas
-    if (
-      (game.status === "PENDING" && status !== "RUNNING") ||
-      (game.status === "RUNNING" && status !== "CRASHED") ||
-      (game.status === "CRASHED" && status !== "PENDING")
-    ) {
+    const validTransitions: Record<string, string[]> = {
+      PENDING: ["RUNNING"],
+      RUNNING: ["CRASHED"],
+      CRASHED: ["PENDING"],
+      COMPLETED: [], // Adicionado para cobrir todos os possíveis estados
+    };
+
+    if (!validTransitions[game.status]?.includes(status)) {
       return NextResponse.json(
         { error: "Transição de estado inválida" },
         { status: 400 }
       );
-    }
-
-    // Se o jogo já estiver no estado desejado, apenas retornar o jogo atual
-    if (game.status === status) {
-      return NextResponse.json({ game });
     }
 
     // Atualizar o jogo

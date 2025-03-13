@@ -134,37 +134,42 @@ export default function CrashGamePage() {
           if (prev <= 1) {
             clearInterval(countdownIntervalRef.current!);
 
-            // Atualizar o status do jogo para RUNNING
-            fetch('/api/crash/game', {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                gameId: game.id,
-                status: 'RUNNING',
-              }),
-            })
-              .then(response => {
-                if (!response.ok) {
-                  return response.json().then(data => {
-                    console.error('Erro ao iniciar jogo:', data.error);
-                    setError(data.error || 'Erro ao iniciar jogo');
-                    throw new Error(data.error || 'Erro ao iniciar jogo');
-                  });
-                }
-                return response.json();
+            // Verificar se o jogo ainda está em estado PENDING antes de tentar atualizá-lo
+            if (game.status === 'PENDING') {
+              // Atualizar o status do jogo para RUNNING
+              fetch('/api/crash/game', {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  gameId: game.id,
+                  status: 'RUNNING',
+                }),
               })
-              .then(data => {
-                console.log('Jogo iniciado:', data);
-                // Definir o tempo de início do jogo
-                setGameStartTime(Date.now());
-              })
-              .catch(err => {
-                console.error('Erro ao iniciar jogo:', err);
-                // Não definir erro aqui para evitar recarregar a página
-                // Apenas registrar no console
-              });
+                .then(response => {
+                  if (!response.ok) {
+                    return response.json().then(data => {
+                      console.error('Erro ao iniciar jogo:', data.error);
+                      // Não definir erro aqui para evitar recarregar a página
+                      throw new Error(data.error || 'Erro ao iniciar jogo');
+                    });
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  console.log('Jogo iniciado:', data);
+                  // Definir o tempo de início do jogo
+                  setGameStartTime(Date.now());
+                })
+                .catch(err => {
+                  console.error('Erro ao iniciar jogo:', err);
+                  // Não definir erro aqui para evitar recarregar a página
+                  // Apenas registrar no console
+                });
+            } else {
+              console.log('Jogo não está mais em estado PENDING, ignorando atualização');
+            }
 
             return 0;
           }
@@ -479,7 +484,7 @@ export default function CrashGamePage() {
 
       // Calcular o multiplicador atual com base no tempo decorrido
       const multiplier = calculateMultiplier(elapsedTime);
-      console.log(`Tempo decorrido: ${elapsedTime}ms, Multiplicador: ${multiplier.toFixed(2)}x`);
+      // console.log(`Tempo decorrido: ${elapsedTime}ms, Multiplicador: ${multiplier.toFixed(2)}x`);
 
       // Atualizar o estado do multiplicador atual
       setCurrentMultiplier(multiplier);
@@ -488,34 +493,39 @@ export default function CrashGamePage() {
       if (game.crashPoint && multiplier >= game.crashPoint) {
         console.log(`Jogo crashou em ${multiplier.toFixed(2)}x (ponto de crash: ${game.crashPoint})`);
 
-        // Atualizar o status do jogo para CRASHED
-        fetch('/api/crash/game', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            gameId: game.id,
-            status: 'CRASHED',
-          }),
-        })
-          .then(response => {
-            if (!response.ok) {
-              return response.json().then(data => {
-                console.error('Erro ao atualizar status do jogo:', data.error);
-                // Não definir erro aqui para evitar recarregar a página
-                throw new Error(data.error || 'Erro ao atualizar status do jogo');
-              });
-            }
-            return response.json();
+        // Verificar se o jogo ainda está em estado RUNNING antes de tentar atualizá-lo
+        if (game.status === 'RUNNING') {
+          // Atualizar o status do jogo para CRASHED
+          fetch('/api/crash/game', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              gameId: game.id,
+              status: 'CRASHED',
+            }),
           })
-          .then(data => {
-            console.log('Jogo finalizado:', data);
-          })
-          .catch(err => {
-            console.error('Erro ao atualizar status do jogo:', err);
-            // Não definir erro aqui para evitar recarregar a página
-          });
+            .then(response => {
+              if (!response.ok) {
+                return response.json().then(data => {
+                  console.error('Erro ao atualizar status do jogo:', data.error);
+                  // Não definir erro aqui para evitar recarregar a página
+                  throw new Error(data.error || 'Erro ao atualizar status do jogo');
+                });
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('Jogo finalizado:', data);
+            })
+            .catch(err => {
+              console.error('Erro ao atualizar status do jogo:', err);
+              // Não definir erro aqui para evitar recarregar a página
+            });
+        } else {
+          console.log('Jogo não está mais em estado RUNNING, ignorando atualização');
+        }
 
         // Parar a animação
         return;
